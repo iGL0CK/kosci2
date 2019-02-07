@@ -212,7 +212,7 @@ void game() { //cala gra
 		playerTwoScore = 0;
 
 
-	} if (playerOneScore > playerOneScore) {
+	} if (playerOneRound > playerTwoRound) {
 		cout << "Wygrywa " << player1 << " w stosunku: " << playerOneRound << ":" << playerTwoRound;
 	} else {
 		cout << "Wygrywa " << player2 << " w stosunku: " << playerTwoRound << ":" << playerOneRound;
