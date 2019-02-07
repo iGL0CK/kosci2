@@ -7,7 +7,7 @@
 
 using namespace std;
 
-int values[5]; //ZMIENNA GLOBALNA !!!!!
+int values[5];
 
 void printRules() {
 	cout << "Zasady gry w kości \n";
@@ -25,9 +25,10 @@ void printRules() {
 	cout << "Poker – pięć kości o tej samej liczbie oczek\n";
 }
 
-void throwing(int tab[]) {
+void throwing(int tab[], int strength) {
 	srand(time(NULL));
 	for (int i = 0; i < 5; i++) { //zapis wyrzuconych kości do tablicy
+		for (int j = 1; j <= strength; j++)
 		tab[i] = (rand() % 6) + 1;
 	}
 }
@@ -35,18 +36,31 @@ void throwing(int tab[]) {
 void display(int tab[]) {
 	cout << "Wyrzuciłeś: "; //wyświetlenie wyrzuconych oczek
 	for (int j = 0; j < 5; j++) {
-		cout << tab[j] << " ";
+		cout << tab[j] << "   ";
 	}
 	cout << endl;
 }
 
 void submit(int &score, int playerThrow[5]) {//obliczanie wynikow rzutow
 
-	for (int i = 0; i < 5; i++) //sortowanie babelkowe
-		for (int j = 1; j < 5 - i; j++) //pętla wewnętrzna
-			if (playerThrow[j - 1] > playerThrow[j])
-				//zamiana miejscami
+	for (int i = 0; i < 5; i++) {//sortowanie babelkowe (żeby sprawdzić strita)
+		for (int j = 1; j < 5 - i; j++) { //pętla wewnętrzna
+			if (playerThrow[j - 1] > playerThrow[j]) {
 				swap(playerThrow[j - 1], playerThrow[j]);
+			}
+		}
+	}
+
+	if (playerThrow[0] == 1) { //mały strit
+		if (playerThrow[0] < playerThrow[1] && playerThrow[1] < playerThrow[2] && playerThrow[2] < playerThrow[3] && playerThrow[3] < playerThrow[4] && playerThrow[4] < playerThrow[5]) {
+			score += 6;
+		}
+		else if (playerThrow[0] == 2) { //duży strit
+			if (playerThrow[0] < playerThrow[1] && playerThrow[1] < playerThrow[2] && playerThrow[2] < playerThrow[3] && playerThrow[3] < playerThrow[4] && playerThrow[4] < playerThrow[5]) {
+				score += 6.5;
+			}
+		}
+	}
 
 	for (int i = 1; i <= 6; i++) {
 		values[i] = 0;
@@ -56,18 +70,6 @@ void submit(int &score, int playerThrow[5]) {//obliczanie wynikow rzutow
 		values[playerThrow[i]]++;
 	}
 
-	for (int i = 0; i < 5; i++) {
-		if (playerThrow[0] == 1) {
-			if (playerThrow[0] < playerThrow[1] && playerThrow[1] < playerThrow[2] && playerThrow[2] < playerThrow[3] && playerThrow[3] < playerThrow[4] && playerThrow[4] < playerThrow[5]) {
-				score += 6;
-			}
-		}
-		else if (playerThrow[0] == 2) {
-			if (playerThrow[0] < playerThrow[1] && playerThrow[1] < playerThrow[2] && playerThrow[2] < playerThrow[3] && playerThrow[3] < playerThrow[4] && playerThrow[4] < playerThrow[5]) {
-				score += 6.5;
-			}
-		}
-	}
 
 	for (int i = 1; i <= 6; i++) {
 		if (values[i] == 2) { //para
@@ -81,13 +83,7 @@ void submit(int &score, int playerThrow[5]) {//obliczanie wynikow rzutow
 		}
 		else if (values[i] == 5) { //poker
 			score += 10;
-		} 
-		/*else if (playerThrow[0] < playerThrow[1] && playerThrow[1] < playerThrow[2] && playerThrow[2] < playerThrow[3] && playerThrow[3] < playerThrow[4] && playerThrow[4] < playerThrow[5]);
-			score += 6; */
-		/* else if (values[0] < values[1] && values[1] < values[2] && values[2] < values[3] && values[3] < values[4] && values[4] < values[5]) { //strit
-			score += 6;
-		} */
-
+		}
 	}
 
 	switch (score) { // wypisanie wyrzuconych kombinacji zaleznie od score
@@ -129,7 +125,7 @@ void errorNum(int &value) { //walidacja bledow
 }
 
 void game() { //cala gra
-	int strength, playerOne[5], playerTwo[5], whichOne, playerOneScore = 0, playerTwoScore = 0, playerOneRound = 0, playerTwoRound = 0;
+	int strength, playerOne[5], playerTwo[5], whichOne, playerOneScore = 0, playerTwoScore = 0, counter = 1, playerOneRound = 0, playerTwoRound = 0;
 	char choice;
 	string player1, player2;
 
@@ -138,23 +134,26 @@ void game() { //cala gra
 	cout << "Wprowadź imię gracza 2: ";
 	cin >> player2;
 
-	while (playerOneRound < 2 && playerTwoRound < 2) { //ilość rund (jeżeli = 3 to koniec gry)
+	while (counter <= 3) { //ilość rund (po 3 to koniec gry)
 
 
 		// RZUCA GRACZ PIERWSZY
 
+
+		cout << "RUNDA " << counter << " !" << endl;
+
 		cout << "Teraz rzuca " << player1 << endl; //rzut pierwszego gracza
 		cout << "Wybierz siłę rzutu (1-3): ";
 		errorNum(strength);
-		throwing(playerOne); //rzucanie koścmi
+		throwing(playerOne, strength); //rzucanie koścmi
 
 		display(playerOne); //wyświetlanie wyrzuconych wartoœci
 
-		cout << "Czy chcesz rzucić jeszcze raz? (T/N)" << endl; //pytanie o ponowienie rzutu
+		cout << "Czy chcesz rzucić jeszcze raz? (T/N): "; //pytanie o ponowienie rzutu
 		cin >> choice;
 
 		if (choice == 'T' || choice == 't') { //drugi rzut
-			cout << "Które kości chcesz przerzucić?" << endl;
+			cout << "Które kości chcesz przerzucić? ";
 			cin >> whichOne;
 
 			srand(time(NULL));
@@ -174,17 +173,17 @@ void game() { //cala gra
 		cout << "Wybierz siłę rzutu (1-3): "; //rzut drugiego gracza
 		errorNum(strength);
 
-		throwing(playerTwo); //rzucanie koścmi
+		throwing(playerTwo, strength); //rzucanie koścmi
 
 		display(playerTwo); //wyświetlanie wyrzuconych wartości
 
-		cout << "Czy chcesz rzucić jeszcze raz? (T/N)" << endl; //pytanie o ponowienie rzutu
+		cout << "Czy chcesz rzucić jeszcze raz? (T/N): "; //pytanie o ponowienie rzutu
 		cin >> choice;
 
 
 		if (choice == 'T' || choice == 't') { //drugi rzut
 
-			cout << "Które kości chcesz przerzucić? " << endl;
+			cout << "Które kości chcesz przerzucić? ";
 			cin >> whichOne;
 
 			srand(time(NULL));
@@ -196,21 +195,22 @@ void game() { //cala gra
 		submit(playerTwoScore, playerTwo);
 
 		if (playerOneScore > playerTwoScore) {
-			cout << "Tą rundę wygrał " << player1 << endl;
+			cout << "Rundę " << counter << " wygrał(a) " << player1 << endl;
 			playerOneRound++;
 		}
 		else if (playerTwoScore > playerOneScore) {
-			cout << "Tą rundę wygrał " << player2 << endl;
+			cout << "Rundę " << counter << " wygrał(a) " << player2 << endl;
 			playerTwoRound++;
 		}
 		else if (playerOneScore == playerTwoScore) {
 			cout << "Remis!" << endl;
-			playerOneRound++;
-			playerTwoRound++;
 		}
+
+		counter++;
 
 		playerOneScore = 0;
 		playerTwoScore = 0;
+
 
 	} if (playerOneScore > playerOneScore) {
 		cout << "Wygrywa " << player1 << " w stosunku: " << playerOneRound << ":" << playerTwoRound;
@@ -218,6 +218,7 @@ void game() { //cala gra
 		cout << "Wygrywa " << player2 << " w stosunku: " << playerTwoRound << ":" << playerOneRound;
 	}
 
+	system("pause");
 
 }
 
@@ -248,6 +249,7 @@ void menuPanel() { // panel menu
 
 int main()
 {
+	int values[5];
 	setlocale(LC_ALL, "");
 
 	cout << endl << "				GRA W KOŚCI			" << endl << endl;
