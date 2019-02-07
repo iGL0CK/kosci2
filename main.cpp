@@ -249,7 +249,6 @@ void menuPanel() { // panel menu
 
 int main()
 {
-	int values[5];
 	setlocale(LC_ALL, "");
 
 	cout << endl << "				GRA W KOŚCI			" << endl << endl;
